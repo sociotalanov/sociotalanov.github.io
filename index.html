@@ -1,0 +1,1229 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Profile Calculator</title>
+        <script src="./math15.2.0.js"></script>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+                font-family:
+                    system-ui,
+                    -apple-system,
+                    "Segoe UI",
+                    Roboto,
+                    sans-serif;
+            }
+            body {
+                background: #050505;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+                padding: 0.5rem;
+                color: #e2e8f0;
+            }
+            .container {
+                background: #0f0f0f;
+                border-radius: 1.5rem;
+                border: 1px solid rgba(255, 255, 255, 0.06);
+                box-shadow:
+                    0 0 40px rgba(255, 0, 122, 0.08),
+                    0 0 20px rgba(0, 255, 170, 0.05);
+                padding: 1.5rem 1rem;
+                max-width: 100%;
+                width: fit-content;
+                transition: box-shadow 0.3s;
+            }
+            h1 {
+                text-align: center;
+                font-weight: 600;
+                color: #f8f9fc;
+                margin-bottom: 0.5rem;
+                font-size: 1.5rem;
+                letter-spacing: 0.02em;
+                text-shadow: 0 0 12px rgba(255, 0, 122, 0.3);
+            }
+            .action-row {
+                display: flex;
+                justify-content: center;
+                margin-bottom: 0.6rem;
+            }
+            .vector-block {
+                margin-bottom: 0.8rem;
+            }
+            .vector-title-row {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 0.4rem;
+                margin-bottom: 0.4rem;
+                flex-wrap: wrap;
+            }
+            .vector-title {
+                font-weight: 600;
+                font-size: 0.8rem;
+                color: #c0c0d0;
+                letter-spacing: 0.02em;
+            }
+            .vector-row {
+                display: flex;
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 3px;
+                margin: 0 auto;
+                width: fit-content;
+            }
+            .cell {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                width: 58px;
+                position: relative;
+            }
+
+            /* --- Label base styles --- */
+            .cell-label {
+                font-size: 0.74rem;
+                font-weight: 700;
+                color: #ffffff;
+                margin-bottom: 2px;
+                text-align: center;
+                line-height: 1.2;
+                white-space: nowrap;
+                transition: text-shadow 0.2s;
+            }
+            .cell-label-bottom {
+                font-size: 0.68rem;
+                font-weight: 700;
+                color: #e0d0ff;
+                margin-top: 2px;
+                text-align: center;
+                line-height: 1.2;
+                white-space: nowrap;
+                transition: text-shadow 0.2s;
+            }
+
+            /* --- Typal (A) labels glow green --- */
+            #rowA .cell-label.typal-label {
+                text-shadow:
+                    0 0 10px rgba(0, 255, 170, 0.9),
+                    0 0 20px rgba(0, 255, 170, 0.5),
+                    0 0 30px rgba(0, 255, 170, 0.3);
+            }
+
+            /* --- Axial top (B) labels glow cyan/blue --- */
+            #rowB .cell-label.axial-top-label {
+                text-shadow:
+                    0 0 10px rgba(0, 212, 255, 0.9),
+                    0 0 20px rgba(0, 212, 255, 0.5),
+                    0 0 30px rgba(0, 212, 255, 0.3);
+            }
+
+            /* --- Axial bottom (B) labels glow purple --- */
+            #rowB .cell-label-bottom.axial-bottom-label {
+                text-shadow:
+                    0 0 10px rgba(160, 64, 255, 0.9),
+                    0 0 20px rgba(160, 64, 255, 0.5),
+                    0 0 30px rgba(160, 64, 255, 0.3);
+            }
+
+            /* --- Functional labels glow green (same as typal) --- */
+            #rowF .cell-label.func-label,
+            #rowF24 .cell-label.func24-label {
+                text-shadow:
+                    0 0 10px rgba(0, 255, 170, 0.9),
+                    0 0 20px rgba(0, 255, 170, 0.5),
+                    0 0 30px rgba(0, 255, 170, 0.3);
+            }
+
+            .cell input[type="number"] {
+                width: 100%;
+                height: 26px;
+                border: 1px solid #2a2a3a;
+                text-align: center;
+                font-size: 0.7rem;
+                font-weight: 500;
+                color: #ffffff;
+                background: #0f0f0f;
+                border-radius: 6px;
+                outline: none;
+                padding: 0 2px;
+                transition:
+                    background 0.2s,
+                    box-shadow 0.2s,
+                    border-color 0.2s;
+                -moz-appearance: textfield;
+            }
+            .cell input[type="number"]::-webkit-outer-spin-button,
+            .cell input[type="number"]::-webkit-inner-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
+            }
+            .cell input[type="number"]:focus {
+                background: #1a1a2e;
+                box-shadow: 0 0 0 2px #ff007a;
+                border-color: #ff007a;
+            }
+
+            /* --- Slider wrapper (doubled height) --- */
+            .slider-wrapper {
+                position: relative;
+                width: 18px;
+                height: 160px;
+                margin: 4px 0 2px 0;
+                border-radius: 9px;
+                overflow: hidden;
+            }
+
+            /* --- Visual track background (dark) --- */
+            .slider-track-bg {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                border-radius: 9px;
+                z-index: 1;
+                pointer-events: none;
+                background: #0f0f0f;
+                box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6);
+            }
+
+            /* --- Colored fill bar (rounded only at the tip) --- */
+            .slider-fill {
+                position: absolute;
+                left: 0;
+                width: 100%;
+                height: 0;
+                border-radius: 0;
+                z-index: 2;
+                pointer-events: none;
+                transition: background-color 0.15s;
+            }
+
+            /* --- Transparent slider on top --- */
+            .cell input[type="range"] {
+                -webkit-appearance: none;
+                appearance: none;
+                width: 100%;
+                height: 100%;
+                background: transparent;
+                cursor: pointer;
+                border-radius: 9px;
+                position: absolute;
+                top: 0;
+                left: 0;
+                z-index: 3;
+                margin: 0;
+                padding: 0;
+                border: none;
+                outline: none;
+            }
+            .cell input[type="range"]::-webkit-slider-runnable-track {
+                width: 100%;
+                height: 100%;
+                border-radius: 9px;
+                background: transparent;
+            }
+            .cell input[type="range"]::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                appearance: none;
+                width: 6px;
+                height: 6px;
+                border-radius: 50%;
+                background: rgba(224, 224, 240, 0.3);
+                margin-top: -3px;
+                cursor: pointer;
+                border: none;
+                box-shadow:
+                    0 0 4px rgba(255, 255, 255, 0.15),
+                    0 0 6px rgba(255, 0, 122, 0.12);
+                transition: box-shadow 0.2s;
+                position: relative;
+                z-index: 4;
+            }
+            .cell input[type="range"]::-moz-range-track {
+                width: 100%;
+                height: 100%;
+                border-radius: 9px;
+                background: transparent;
+                border: none;
+            }
+            .cell input[type="range"]::-moz-range-thumb {
+                width: 6px;
+                height: 6px;
+                border-radius: 50%;
+                background: rgba(224, 224, 240, 0.3);
+                cursor: pointer;
+                border: none;
+                box-shadow:
+                    0 0 4px rgba(255, 255, 255, 0.15),
+                    0 0 6px rgba(255, 0, 122, 0.12);
+                position: relative;
+                z-index: 4;
+            }
+
+            /* --- Color bar with variance percentage --- */
+            .color-bar {
+                width: 100%;
+                height: 15px;
+                border-radius: 7px;
+                margin-top: 3px;
+                background: #1a1a2e;
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6);
+                transition:
+                    background-color 0.15s,
+                    box-shadow 0.15s;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                position: relative;
+                overflow: hidden;
+            }
+            .color-bar-text {
+                font-size: 0.57rem;
+                font-weight: 600;
+                color: #ffffff;
+                text-shadow:
+                    0 0 2px rgba(0, 0, 0, 0.9),
+                    0 0 3px rgba(0, 0, 0, 0.7);
+                pointer-events: none;
+                z-index: 1;
+                line-height: 1;
+                letter-spacing: 0.01em;
+            }
+
+            .reset-row {
+                display: flex;
+                justify-content: flex-end;
+                margin-top: 0.5rem;
+            }
+            button {
+                background: #0f0f0f;
+                border: 1px solid #2a2a3a;
+                padding: 0.3rem 0.8rem;
+                border-radius: 0.4rem;
+                font-size: 0.65rem;
+                cursor: pointer;
+                color: #c0c0d0;
+                transition: all 0.2s;
+                margin: 0 0.15rem;
+            }
+            button:hover {
+                background: #1a1a2e;
+                border-color: #ff007a;
+                color: #ffffff;
+                box-shadow: 0 0 10px rgba(255, 0, 122, 0.3);
+            }
+
+            @media (max-width: 600px) {
+                .cell {
+                    width: 46px;
+                }
+                .cell input[type="number"] {
+                    height: 22px;
+                    font-size: 0.62rem;
+                }
+                .slider-wrapper {
+                    height: 120px;
+                    width: 16px;
+                    border-radius: 8px;
+                }
+                .slider-track-bg {
+                    border-radius: 8px;
+                }
+                .slider-fill {
+                    border-radius: 0;
+                }
+                .cell input[type="range"] {
+                    border-radius: 8px;
+                }
+                .cell input[type="range"]::-webkit-slider-runnable-track {
+                    border-radius: 8px;
+                }
+                .cell input[type="range"]::-moz-range-track {
+                    border-radius: 8px;
+                }
+                .cell input[type="range"]::-webkit-slider-thumb {
+                    width: 5px;
+                    height: 5px;
+                    margin-top: -2px;
+                    background: rgba(224, 224, 240, 0.25);
+                    box-shadow:
+                        0 0 3px rgba(255, 255, 255, 0.1),
+                        0 0 4px rgba(255, 0, 122, 0.08);
+                }
+                .cell input[type="range"]::-moz-range-thumb {
+                    width: 5px;
+                    height: 5px;
+                    background: rgba(224, 224, 240, 0.25);
+                    box-shadow:
+                        0 0 3px rgba(255, 255, 255, 0.1),
+                        0 0 4px rgba(255, 0, 122, 0.08);
+                }
+                .cell-label {
+                    font-size: 0.64rem;
+                }
+                .cell-label-bottom {
+                    font-size: 0.58rem;
+                }
+                .color-bar {
+                    height: 13px;
+                    border-radius: 6px;
+                }
+                .color-bar-text {
+                    font-size: 0.52rem;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Profile Calculator</h1>
+
+            <div class="action-row">
+                <button id="normalizeBtn">Normalize (sample)</button>
+            </div>
+
+            <!-- Vector B (top) -->
+            <div class="vector-block">
+                <div class="vector-title-row">
+                    <span class="vector-title">Axial profile</span>
+                    <button id="copyB">Copy</button>
+                </div>
+                <div class="vector-row" id="rowB"></div>
+            </div>
+
+            <!-- Vector A (bottom) -->
+            <div class="vector-block">
+                <div class="vector-title-row">
+                    <span class="vector-title">Typal profile</span>
+                    <button id="copyA">Copy</button>
+                </div>
+                <div class="vector-row" id="rowA"></div>
+            </div>
+
+            <!-- Vector F (functional) -->
+            <div class="vector-block">
+                <div class="vector-title-row">
+                    <span class="vector-title">Functional profile</span>
+                    <button id="copyF">Copy</button>
+                </div>
+                <div class="vector-row" id="rowF"></div>
+            </div>
+
+            <!-- Vector F24 (24-function) -->
+            <div class="vector-block">
+                <div class="vector-title-row">
+                    <span class="vector-title">24‑function profile</span>
+                    <button id="copyF24">Copy</button>
+                </div>
+                <div class="vector-row" id="rowF24"></div>
+            </div>
+
+            <div class="reset-row">
+                <button id="resetBtn">⟳ Reset all to zeros</button>
+            </div>
+        </div>
+
+        <script>
+            (function () {
+                if (typeof math === "undefined") {
+                    alert("math.js failed to load");
+                    return;
+                }
+
+                const M = [
+                    [
+                        0.0625, -0.0625, -0.0625, 0.0625, 0.0625, -0.0625, -0.0625, 0.0625, 0.0625, -0.0625, -0.0625,
+                        0.0625, 0.0625, -0.0625, -0.0625, 0.0625,
+                    ],
+                    [
+                        0.0625, -0.0625, 0.0625, -0.0625, 0.0625, -0.0625, 0.0625, -0.0625, 0.0625, -0.0625, 0.0625,
+                        -0.0625, 0.0625, -0.0625, 0.0625, -0.0625,
+                    ],
+                    [
+                        0.0625, 0.0625, -0.0625, -0.0625, 0.0625, 0.0625, -0.0625, -0.0625, 0.0625, 0.0625, -0.0625,
+                        -0.0625, 0.0625, 0.0625, -0.0625, -0.0625,
+                    ],
+                    [
+                        0.0625, 0.0625, -0.0625, -0.0625, -0.0625, -0.0625, 0.0625, 0.0625, -0.0625, -0.0625, 0.0625,
+                        0.0625, 0.0625, 0.0625, -0.0625, -0.0625,
+                    ],
+                    [
+                        0.0625, 0.0625, 0.0625, 0.0625, -0.0625, -0.0625, -0.0625, -0.0625, -0.0625, -0.0625, -0.0625,
+                        -0.0625, 0.0625, 0.0625, 0.0625, 0.0625,
+                    ],
+                    [
+                        0.0625, -0.0625, -0.0625, 0.0625, -0.0625, 0.0625, 0.0625, -0.0625, -0.0625, 0.0625, 0.0625,
+                        -0.0625, 0.0625, -0.0625, -0.0625, 0.0625,
+                    ],
+                    [
+                        0.0625, -0.0625, 0.0625, -0.0625, -0.0625, 0.0625, -0.0625, 0.0625, -0.0625, 0.0625, -0.0625,
+                        0.0625, 0.0625, -0.0625, 0.0625, -0.0625,
+                    ],
+                    [
+                        0.0625, 0.0625, -0.0625, -0.0625, 0.0625, 0.0625, -0.0625, -0.0625, -0.0625, -0.0625, 0.0625,
+                        0.0625, -0.0625, -0.0625, 0.0625, 0.0625,
+                    ],
+                    [
+                        0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, -0.0625, -0.0625, -0.0625,
+                        -0.0625, -0.0625, -0.0625, -0.0625, -0.0625,
+                    ],
+                    [
+                        0.0625, -0.0625, -0.0625, 0.0625, 0.0625, -0.0625, -0.0625, 0.0625, -0.0625, 0.0625, 0.0625,
+                        -0.0625, -0.0625, 0.0625, 0.0625, -0.0625,
+                    ],
+                    [
+                        0.0625, -0.0625, 0.0625, -0.0625, 0.0625, -0.0625, 0.0625, -0.0625, -0.0625, 0.0625, -0.0625,
+                        0.0625, -0.0625, 0.0625, -0.0625, 0.0625,
+                    ],
+                    [
+                        0.0625, 0.0625, -0.0625, -0.0625, -0.0625, -0.0625, 0.0625, 0.0625, 0.0625, 0.0625, -0.0625,
+                        -0.0625, -0.0625, -0.0625, 0.0625, 0.0625,
+                    ],
+                    [
+                        0.0625, 0.0625, 0.0625, 0.0625, -0.0625, -0.0625, -0.0625, -0.0625, 0.0625, 0.0625, 0.0625,
+                        0.0625, -0.0625, -0.0625, -0.0625, -0.0625,
+                    ],
+                    [
+                        0.0625, -0.0625, -0.0625, 0.0625, -0.0625, 0.0625, 0.0625, -0.0625, 0.0625, -0.0625, -0.0625,
+                        0.0625, -0.0625, 0.0625, 0.0625, -0.0625,
+                    ],
+                    [
+                        0.0625, -0.0625, 0.0625, -0.0625, -0.0625, 0.0625, -0.0625, 0.0625, 0.0625, -0.0625, 0.0625,
+                        -0.0625, -0.0625, 0.0625, -0.0625, 0.0625,
+                    ],
+                ];
+
+                const N = [
+                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [-1, -1, 1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1, -1, -1],
+                    [-1, 1, -1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1],
+                    [1, -1, -1, -1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1, -1],
+                    [1, 1, 1, -1, -1, -1, -1, 1, 1, 1, 1, -1, -1, -1, -1],
+                    [-1, -1, 1, -1, -1, 1, 1, 1, 1, -1, -1, -1, -1, 1, 1],
+                    [-1, 1, -1, 1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, -1],
+                    [1, -1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, -1, -1, 1],
+                    [1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1],
+                    [-1, -1, 1, -1, -1, 1, 1, -1, -1, 1, 1, 1, 1, -1, -1],
+                    [-1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, -1, 1, -1, 1],
+                    [1, -1, -1, 1, -1, -1, 1, 1, -1, -1, 1, -1, 1, 1, -1],
+                    [1, 1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1],
+                    [-1, -1, 1, 1, 1, -1, -1, -1, -1, 1, 1, -1, -1, 1, 1],
+                    [-1, 1, -1, -1, 1, -1, 1, 1, -1, 1, -1, 1, -1, 1, -1],
+                    [1, -1, -1, -1, 1, 1, -1, 1, -1, -1, 1, 1, -1, -1, 1],
+                ];
+
+                const FMatrix = [
+                    [-1, 1, -1, 3, -3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [1, 1, 1, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [-1, 1, -1, -3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [1, 1, 1, -3, -3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [-1, -1, 1, 0, 0, 0, 0, 3, 3, 0, 0, 0, 0, 0, 0],
+                    [1, -1, -1, 0, 0, 0, 0, 3, -3, 0, 0, 0, 0, 0, 0],
+                    [-1, -1, 1, 0, 0, 0, 0, -3, -3, 0, 0, 0, 0, 0, 0],
+                    [1, -1, -1, 0, 0, 0, 0, -3, 3, 0, 0, 0, 0, 0, 0],
+                    [-1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 0, 0],
+                    [1, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 3, -3, 0, 0],
+                    [-1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, -3, -3, 0, 0],
+                    [1, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, -3, 3, 0, 0],
+                ];
+
+                const B_from_F = [
+                    [-1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1],
+                    [1, 1, 1, 1, -1, -1, -1, -1, 0, 0, 0, 0],
+                    [-1, 1, -1, 1, 1, -1, 1, -1, 1, -1, 1, -1],
+                    [3, 3, -3, -3, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [-3, 3, 3, -3, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 3, 3, -3, -3, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 3, -3, -3, 3, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 3, 3, -3, -3],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 3, -3, -3, 3],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                ].map((row) => row.map((v) => v / 12));
+
+                // New 24-function matrix (24 rows, 15 columns)
+                const F24_Matrix = [
+                    [1, 1, 1, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [-1, -1, 1, 3, 3, -3, -3, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [-1, 1, -1, 3, -3, 3, -3, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [1, -1, -1, 3, -3, -3, 3, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [1, 1, 1, -3, -3, -3, -3, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [-1, -1, 1, -3, -3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [-1, 1, -1, -3, 3, -3, 3, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [1, -1, -1, -3, 3, 3, -3, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [1, 1, 1, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0],
+                    [-1, -1, 1, 0, 0, 0, 0, 3, 3, -3, -3, 0, 0, 0, 0],
+                    [-1, 1, -1, 0, 0, 0, 0, 3, -3, 3, -3, 0, 0, 0, 0],
+                    [1, -1, -1, 0, 0, 0, 0, 3, -3, -3, 3, 0, 0, 0, 0],
+                    [1, 1, 1, 0, 0, 0, 0, -3, -3, -3, -3, 0, 0, 0, 0],
+                    [-1, -1, 1, 0, 0, 0, 0, -3, -3, 3, 3, 0, 0, 0, 0],
+                    [-1, 1, -1, 0, 0, 0, 0, -3, 3, -3, 3, 0, 0, 0, 0],
+                    [1, -1, -1, 0, 0, 0, 0, -3, 3, 3, -3, 0, 0, 0, 0],
+                    [1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3],
+                    [-1, -1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, -3, -3],
+                    [-1, 1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 3, -3, 3, -3],
+                    [1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 3, -3, -3, 3],
+                    [1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, -3, -3, -3, -3],
+                    [-1, -1, 1, 0, 0, 0, 0, 0, 0, 0, 0, -3, -3, 3, 3],
+                    [-1, 1, -1, 0, 0, 0, 0, 0, 0, 0, 0, -3, 3, -3, 3],
+                    [1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, -3, 3, 3, -3],
+                ];
+
+                // Backward: transpose divided by 24
+                const B_from_F24 = Array.from({ length: 15 }, (_, i) =>
+                    Array.from({ length: 24 }, (_, j) => F24_Matrix[j][i] / 24),
+                );
+
+                const RANGE_A = [-3.75, 3.75];
+                const RANGE_B = [-0.968245836551854, 0.968245836551854];
+
+                const labelsA = [
+                    "NeTi",
+                    "TiNe",
+                    "SiFe",
+                    "FeSi",
+                    "SeTi",
+                    "TiSe",
+                    "NiFe",
+                    "FeNi",
+                    "SeFi",
+                    "FiSe",
+                    "NiTe",
+                    "TeNi",
+                    "NeFi",
+                    "FiNe",
+                    "SiTe",
+                    "TeSi",
+                ];
+                const labelsBTop = [
+                    "extravert",
+                    "irrational",
+                    "static",
+                    "intuitive",
+                    "judicious",
+                    "tactical",
+                    "carefree",
+                    "thinking",
+                    "merry",
+                    "construct.",
+                    "yielding",
+                    "questim",
+                    "democrat",
+                    "positivist",
+                    "process",
+                ];
+                const labelsBBottom = [
+                    "introvert",
+                    "rational",
+                    "dynamic",
+                    "sensing",
+                    "decisive",
+                    "strategic",
+                    "farsighted",
+                    "feeling",
+                    "serious",
+                    "emotivist",
+                    "obstinate",
+                    "declatim",
+                    "aristocrat",
+                    "negativist",
+                    "result",
+                ];
+                const labelsF = ["Ni", "Ne", "Si", "Se", "Ti", "Te", "Fi", "Fe", "Qi", "Qe", "Di", "De"];
+                const labelsF24 = [
+                    "Pe-N",
+                    "Ji-N",
+                    "Pi-N",
+                    "Je-N",
+                    "Pe-S",
+                    "Ji-S",
+                    "Pi-S",
+                    "Je-S",
+                    "Pe-T",
+                    "Ji-T",
+                    "Pi-T",
+                    "Je-T",
+                    "Pe-F",
+                    "Ji-F",
+                    "Pi-F",
+                    "Je-F",
+                    "Pe-Q",
+                    "Ji-Q",
+                    "Pi-Q",
+                    "Je-Q",
+                    "Pe-D",
+                    "Ji-D",
+                    "Pi-D",
+                    "Je-D",
+                ];
+
+                // Fixed ranges for functional (first 8, last 4)
+                const rangesF = [
+                    { min: -4.437059837324712, max: 4.437059837324712 },
+                    { min: -4.437059837324712, max: 4.437059837324712 },
+                    { min: -4.437059837324712, max: 4.437059837324712 },
+                    { min: -4.437059837324712, max: 4.437059837324712 },
+                    { min: -4.437059837324712, max: 4.437059837324712 },
+                    { min: -4.437059837324712, max: 4.437059837324712 },
+                    { min: -4.437059837324712, max: 4.437059837324712 },
+                    { min: -4.437059837324712, max: 4.437059837324712 },
+                    { min: -4.330127018922194, max: 4.330127018922194 },
+                    { min: -4.330127018922194, max: 4.330127018922194 },
+                    { min: -4.330127018922194, max: 4.330127018922194 },
+                    { min: -4.330127018922194, max: 4.330127018922194 },
+                ];
+
+                // Ranges for 24-function: dynamic based on row sums * maxB
+                const maxB = RANGE_B[1];
+                const rangesF24 = { min: -6.046693311223912, max: 6.046693311223912 };
+
+                // ---------- Build UI ----------
+                function createVectorRow(
+                    containerId,
+                    count,
+                    prefix,
+                    min,
+                    max,
+                    topLabels,
+                    bottomLabels,
+                    topLabelClass,
+                    bottomLabelClass,
+                ) {
+                    const row = document.getElementById(containerId);
+                    for (let i = 0; i < count; i++) {
+                        const cell = document.createElement("div");
+                        cell.className = "cell";
+                        const topLabel = topLabels?.[i] ?? `${prefix}${i + 1}`;
+                        const bottomLabel = bottomLabels?.[i] ?? "";
+                        const topClassAttr = topLabelClass
+                            ? ` class="cell-label ${topLabelClass}"`
+                            : ' class="cell-label"';
+                        const bottomHtml = bottomLabel
+                            ? `<span class="cell-label-bottom ${bottomLabelClass || ""}">${bottomLabel}</span>`
+                            : "";
+                        cell.innerHTML = `
+                            <span${topClassAttr}>${topLabel}</span>
+                            <input type="number" step="any" value="0" data-vector="${prefix}" data-index="${i}">
+                            <div class="slider-wrapper">
+                                <div class="slider-track-bg"></div>
+                                <div class="slider-fill"></div>
+                                <input type="range" min="${min}" max="${max}" step="0.001" value="0" data-vector="${prefix}" data-index="${i}" orient="vertical">
+                            </div>
+                            <div class="color-bar">
+                                <span class="color-bar-text">0.0%</span>
+                            </div>
+                            ${bottomHtml}
+                        `;
+                        row.appendChild(cell);
+                    }
+                }
+
+                function createFunctionalRow() {
+                    const row = document.getElementById("rowF");
+                    for (let i = 0; i < 12; i++) {
+                        const cell = document.createElement("div");
+                        cell.className = "cell";
+                        const label = labelsF[i];
+                        const range = rangesF[i];
+                        cell.innerHTML = `
+                            <span class="cell-label func-label">${label}</span>
+                            <input type="number" step="any" value="0" data-vector="f" data-index="${i}">
+                            <div class="slider-wrapper">
+                                <div class="slider-track-bg"></div>
+                                <div class="slider-fill"></div>
+                                <input type="range" min="${range.min}" max="${range.max}" step="0.001" value="0" data-vector="f" data-index="${i}" orient="vertical">
+                            </div>
+                            <div class="color-bar">
+                                <span class="color-bar-text">0.0%</span>
+                            </div>
+                        `;
+                        row.appendChild(cell);
+                    }
+                }
+
+                function create24FunctionRow() {
+                    const row = document.getElementById("rowF24");
+                    for (let i = 0; i < 24; i++) {
+                        const cell = document.createElement("div");
+                        cell.className = "cell";
+                        const label = labelsF24[i];
+                        const range = rangesF24;
+                        cell.innerHTML = `
+                            <span class="cell-label func24-label">${label}</span>
+                            <input type="number" step="any" value="0" data-vector="f24" data-index="${i}">
+                            <div class="slider-wrapper">
+                                <div class="slider-track-bg"></div>
+                                <div class="slider-fill"></div>
+                                <input type="range" min="${range.min}" max="${range.max}" step="0.001" value="0" data-vector="f24" data-index="${i}" orient="vertical">
+                            </div>
+                            <div class="color-bar">
+                                <span class="color-bar-text">0.0%</span>
+                            </div>
+                        `;
+                        row.appendChild(cell);
+                    }
+                }
+
+                createVectorRow(
+                    "rowB",
+                    15,
+                    "b",
+                    RANGE_B[0],
+                    RANGE_B[1],
+                    labelsBTop,
+                    labelsBBottom,
+                    "axial-top-label",
+                    "axial-bottom-label",
+                );
+                createVectorRow("rowA", 16, "a", RANGE_A[0], RANGE_A[1], labelsA, null, "typal-label", null);
+                createFunctionalRow();
+                create24FunctionRow();
+
+                // Gather DOM elements
+                const inputsA = Array.from(document.querySelectorAll('#rowA input[type="number"]')).sort(
+                    (a, b) => a.dataset.index - b.dataset.index,
+                );
+                const slidersA = Array.from(document.querySelectorAll('#rowA input[type="range"]')).sort(
+                    (a, b) => a.dataset.index - b.dataset.index,
+                );
+                const barsA = Array.from(document.querySelectorAll("#rowA .color-bar"));
+                const fillBarsA = Array.from(document.querySelectorAll("#rowA .slider-fill"));
+                const percentTextsA = Array.from(document.querySelectorAll("#rowA .color-bar-text"));
+
+                const inputsB = Array.from(document.querySelectorAll('#rowB input[type="number"]')).sort(
+                    (a, b) => a.dataset.index - b.dataset.index,
+                );
+                const slidersB = Array.from(document.querySelectorAll('#rowB input[type="range"]')).sort(
+                    (a, b) => a.dataset.index - b.dataset.index,
+                );
+                const barsB = Array.from(document.querySelectorAll("#rowB .color-bar"));
+                const fillBarsB = Array.from(document.querySelectorAll("#rowB .slider-fill"));
+                const percentTextsB = Array.from(document.querySelectorAll("#rowB .color-bar-text"));
+
+                const inputsF = Array.from(document.querySelectorAll('#rowF input[type="number"]')).sort(
+                    (a, b) => a.dataset.index - b.dataset.index,
+                );
+                const slidersF = Array.from(document.querySelectorAll('#rowF input[type="range"]')).sort(
+                    (a, b) => a.dataset.index - b.dataset.index,
+                );
+                const fillBarsF = Array.from(document.querySelectorAll("#rowF .slider-fill"));
+                const barsF = Array.from(document.querySelectorAll("#rowF .color-bar"));
+                const percentTextsF = Array.from(document.querySelectorAll("#rowF .color-bar-text"));
+
+                const inputsF24 = Array.from(document.querySelectorAll('#rowF24 input[type="number"]')).sort(
+                    (a, b) => a.dataset.index - b.dataset.index,
+                );
+                const slidersF24 = Array.from(document.querySelectorAll('#rowF24 input[type="range"]')).sort(
+                    (a, b) => a.dataset.index - b.dataset.index,
+                );
+                const fillBarsF24 = Array.from(document.querySelectorAll("#rowF24 .slider-fill"));
+                const barsF24 = Array.from(document.querySelectorAll("#rowF24 .color-bar"));
+                const percentTextsF24 = Array.from(document.querySelectorAll("#rowF24 .color-bar-text"));
+
+                let preciseA = new Array(16).fill(0);
+                let preciseB = new Array(15).fill(0);
+                let preciseF = new Array(12).fill(0);
+                let preciseF24 = new Array(24).fill(0);
+
+                // ---------- Colors ----------
+                const negA = [255, 0, 122],
+                    zeroA = [26, 26, 46],
+                    posA = [0, 255, 170];
+                const negB = [160, 64, 255],
+                    zeroB = [26, 26, 46],
+                    posB = [0, 212, 255];
+                const negF = [255, 0, 122],
+                    zeroF = [26, 26, 46],
+                    posF = [0, 255, 170];
+                const negF24 = [255, 0, 122],
+                    zeroF24 = [26, 26, 46],
+                    posF24 = [0, 255, 170]; // same as typal
+
+                function lerp(c1, c2, t) {
+                    return c1.map((v, i) => Math.round(v + (c2[i] - v) * t));
+                }
+                function color(val, min, max, neg, zero, pos) {
+                    if (min === max) return val > 0 ? `rgb(${pos})` : val < 0 ? `rgb(${neg})` : `rgb(${zero})`;
+                    if (val <= 0) return `rgb(${lerp(neg, zero, (val - min) / (0 - min))})`;
+                    return `rgb(${lerp(zero, pos, (val - 0) / (max - 0))})`;
+                }
+                const colorA = (v, min, max) => color(v, min, max, negA, zeroA, posA);
+                const colorB = (v, min, max) => color(v, min, max, negB, zeroB, posB);
+                const colorF = (v, min, max) => color(v, min, max, negF, zeroF, posF);
+                const colorF24 = (v, min, max) => color(v, min, max, negF24, zeroF24, posF24);
+
+                function getRange(arr) {
+                    return { min: Math.min(...arr), max: Math.max(...arr) };
+                }
+
+                function setSliderFill(fillBar, value, min, max, cellColor) {
+                    let topPercent, heightPercent;
+                    if (value >= 0) {
+                        const positiveFrac = (value - 0) / (max - 0);
+                        heightPercent = positiveFrac * 50;
+                        topPercent = 50 - heightPercent;
+                        fillBar.style.borderRadius = "9px 9px 0 0";
+                    } else {
+                        const negativeFrac = (0 - value) / (0 - min);
+                        heightPercent = negativeFrac * 50;
+                        topPercent = 50;
+                        fillBar.style.borderRadius = "0 0 9px 9px";
+                    }
+                    fillBar.style.height = heightPercent + "%";
+                    fillBar.style.top = topPercent + "%";
+                    fillBar.style.backgroundColor = cellColor;
+                }
+
+                function computePercentages(values) {
+                    const sumSq = values.reduce((s, v) => s + v * v, 0);
+                    if (sumSq < 1e-10) return values.map(() => 0);
+                    return values.map((v) => ((v * v) / sumSq) * 100);
+                }
+
+                // ---------- Update display ----------
+                function updateDisplay() {
+                    const focused = document.activeElement;
+                    const rA = getRange(preciseA),
+                        rB = getRange(preciseB),
+                        rF = getRange(preciseF),
+                        rF24 = getRange(preciseF24);
+                    const pctsA = computePercentages(preciseA);
+                    const pctsB = computePercentages(preciseB);
+                    const pctsF = computePercentages(preciseF);
+                    const pctsF24 = computePercentages(preciseF24);
+
+                    inputsB.forEach((inp, i) => {
+                        const val = preciseB[i];
+                        if (inp !== focused) inp.value = val.toFixed(2);
+                        slidersB[i].value = val;
+                        const c = colorB(val, rB.min, rB.max);
+                        barsB[i].style.backgroundColor = c;
+                        barsB[i].style.boxShadow = `0 0 8px ${c}`;
+                        setSliderFill(fillBarsB[i], val, RANGE_B[0], RANGE_B[1], c);
+                        percentTextsB[i].textContent = pctsB[i].toFixed(1) + "%";
+                    });
+
+                    inputsA.forEach((inp, i) => {
+                        const val = preciseA[i];
+                        if (inp !== focused) inp.value = val.toFixed(2);
+                        slidersA[i].value = val;
+                        const c = colorA(val, rA.min, rA.max);
+                        barsA[i].style.backgroundColor = c;
+                        barsA[i].style.boxShadow = `0 0 8px ${c}`;
+                        setSliderFill(fillBarsA[i], val, RANGE_A[0], RANGE_A[1], c);
+                        percentTextsA[i].textContent = pctsA[i].toFixed(1) + "%";
+                    });
+
+                    inputsF.forEach((inp, i) => {
+                        const val = preciseF[i];
+                        if (inp !== focused) inp.value = val.toFixed(2);
+                        slidersF[i].value = val;
+                        const range = rangesF[i];
+                        const c = colorF(val, rF.min, rF.max);
+                        barsF[i].style.backgroundColor = c;
+                        barsF[i].style.boxShadow = `0 0 8px ${c}`;
+                        setSliderFill(fillBarsF[i], val, range.min, range.max, c);
+                        percentTextsF[i].textContent = pctsF[i].toFixed(1) + "%";
+                    });
+
+                    inputsF24.forEach((inp, i) => {
+                        const val = preciseF24[i];
+                        if (inp !== focused) inp.value = val.toFixed(2);
+                        slidersF24[i].value = val;
+                        const range = rangesF24;
+                        const c = colorF24(val, rF24.min, rF24.max);
+                        barsF24[i].style.backgroundColor = c;
+                        barsF24[i].style.boxShadow = `0 0 8px ${c}`;
+                        setSliderFill(fillBarsF24[i], val, range.min, range.max, c);
+                        percentTextsF24[i].textContent = pctsF24[i].toFixed(1) + "%";
+                    });
+                }
+
+                function computeFunctional() {
+                    const f = math.multiply(FMatrix, preciseB);
+                    f.forEach((v, i) => {
+                        preciseF[i] = v;
+                    });
+                    inputsF.forEach((inp, i) => {
+                        inp.value = preciseF[i];
+                    });
+                }
+
+                function computeF24() {
+                    const f24 = math.multiply(F24_Matrix, preciseB);
+                    f24.forEach((v, i) => {
+                        preciseF24[i] = v;
+                    });
+                    inputsF24.forEach((inp, i) => {
+                        inp.value = preciseF24[i];
+                    });
+                }
+
+                function recomputeFromA() {
+                    inputsA.forEach((inp, i) => {
+                        const v = parseFloat(inp.value);
+                        preciseA[i] = isNaN(v) ? 0 : v;
+                    });
+                    const b = math.multiply(M, preciseA);
+                    b.forEach((v, i) => {
+                        preciseB[i] = v;
+                    });
+                    computeFunctional();
+                    computeF24();
+                    updateDisplay();
+                }
+
+                function recomputeFromB() {
+                    inputsB.forEach((inp, i) => {
+                        const v = parseFloat(inp.value);
+                        preciseB[i] = isNaN(v) ? 0 : v;
+                    });
+                    const a = math.multiply(N, preciseB);
+                    a.forEach((v, i) => {
+                        preciseA[i] = v;
+                    });
+                    computeFunctional();
+                    computeF24();
+                    updateDisplay();
+                }
+
+                function recomputeFromF() {
+                    inputsF.forEach((inp, i) => {
+                        const v = parseFloat(inp.value);
+                        preciseF[i] = isNaN(v) ? 0 : v;
+                    });
+                    const newB = [...preciseB];
+                    for (let i = 0; i < 15; i++) {
+                        const row = B_from_F[i];
+                        if (row.some((x) => x !== 0)) {
+                            let dot = 0;
+                            for (let j = 0; j < 12; j++) dot += row[j] * preciseF[j];
+                            newB[i] = dot;
+                        }
+                    }
+                    preciseB = newB;
+                    inputsB.forEach((inp, i) => {
+                        inp.value = preciseB[i];
+                    });
+                    const a = math.multiply(N, preciseB);
+                    a.forEach((v, i) => {
+                        preciseA[i] = v;
+                    });
+                    inputsA.forEach((inp, i) => {
+                        inp.value = preciseA[i];
+                    });
+                    computeF24(); // update 24-function from new B
+                    updateDisplay();
+                }
+
+                function recomputeFromF24() {
+                    inputsF24.forEach((inp, i) => {
+                        const v = parseFloat(inp.value);
+                        preciseF24[i] = isNaN(v) ? 0 : v;
+                    });
+                    const newB = [...preciseB];
+                    for (let i = 0; i < 15; i++) {
+                        const row = B_from_F24[i];
+                        if (row.some((x) => x !== 0)) {
+                            let dot = 0;
+                            for (let j = 0; j < 24; j++) dot += row[j] * preciseF24[j];
+                            newB[i] = dot;
+                        }
+                    }
+                    preciseB = newB;
+                    inputsB.forEach((inp, i) => {
+                        inp.value = preciseB[i];
+                    });
+                    const a = math.multiply(N, preciseB);
+                    a.forEach((v, i) => {
+                        preciseA[i] = v;
+                    });
+                    inputsA.forEach((inp, i) => {
+                        inp.value = preciseA[i];
+                    });
+                    computeFunctional(); // update functional from new B
+                    updateDisplay();
+                }
+
+                // --- Event listeners ---
+                inputsA.forEach((inp) => {
+                    inp.addEventListener("input", recomputeFromA);
+                    inp.addEventListener("focus", () => {
+                        inp.value = preciseA[inp.dataset.index];
+                    });
+                    inp.addEventListener("blur", updateDisplay);
+                });
+                inputsB.forEach((inp) => {
+                    inp.addEventListener("input", recomputeFromB);
+                    inp.addEventListener("focus", () => {
+                        inp.value = preciseB[inp.dataset.index];
+                    });
+                    inp.addEventListener("blur", updateDisplay);
+                });
+                slidersA.forEach((s) => {
+                    s.addEventListener("input", () => {
+                        const i = s.dataset.index;
+                        preciseA[i] = parseFloat(s.value);
+                        inputsA[i].value = preciseA[i];
+                        recomputeFromA();
+                    });
+                });
+                slidersB.forEach((s) => {
+                    s.addEventListener("input", () => {
+                        const i = s.dataset.index;
+                        preciseB[i] = parseFloat(s.value);
+                        inputsB[i].value = preciseB[i];
+                        recomputeFromB();
+                    });
+                });
+
+                inputsF.forEach((inp) => {
+                    inp.addEventListener("input", recomputeFromF);
+                    inp.addEventListener("focus", () => {
+                        inp.value = preciseF[inp.dataset.index];
+                    });
+                    inp.addEventListener("blur", updateDisplay);
+                });
+                slidersF.forEach((s) => {
+                    s.addEventListener("input", () => {
+                        const i = s.dataset.index;
+                        preciseF[i] = parseFloat(s.value);
+                        inputsF[i].value = preciseF[i];
+                        recomputeFromF();
+                    });
+                });
+
+                inputsF24.forEach((inp) => {
+                    inp.addEventListener("input", recomputeFromF24);
+                    inp.addEventListener("focus", () => {
+                        inp.value = preciseF24[inp.dataset.index];
+                    });
+                    inp.addEventListener("blur", updateDisplay);
+                });
+                slidersF24.forEach((s) => {
+                    s.addEventListener("input", () => {
+                        const i = s.dataset.index;
+                        preciseF24[i] = parseFloat(s.value);
+                        inputsF24[i].value = preciseF24[i];
+                        recomputeFromF24();
+                    });
+                });
+
+                document.getElementById("normalizeBtn").addEventListener("click", () => {
+                    const n = preciseA.length,
+                        mean = preciseA.reduce((s, v) => s + v, 0) / n;
+                    const variance = preciseA.reduce((s, v) => s + (v - mean) ** 2, 0) / (n - 1);
+                    const std = Math.sqrt(variance);
+                    if (std < 1e-10) preciseA = preciseA.map(() => 0);
+                    else preciseA = preciseA.map((v) => (v - mean) / std);
+                    inputsA.forEach((inp, i) => {
+                        inp.value = preciseA[i];
+                    });
+                    recomputeFromA();
+                });
+
+                function copyVector(arr, btn) {
+                    const text = arr.map((v) => v.toFixed(6)).join("\t");
+                    navigator.clipboard
+                        .writeText(text)
+                        .then(() => {
+                            const orig = btn.textContent;
+                            btn.textContent = "✓ Copied";
+                            setTimeout(() => {
+                                btn.textContent = orig;
+                            }, 1500);
+                        })
+                        .catch(() => alert("Failed to copy"));
+                }
+                document
+                    .getElementById("copyA")
+                    .addEventListener("click", () => copyVector(preciseA, document.getElementById("copyA")));
+                document
+                    .getElementById("copyB")
+                    .addEventListener("click", () => copyVector(preciseB, document.getElementById("copyB")));
+                document
+                    .getElementById("copyF")
+                    .addEventListener("click", () => copyVector(preciseF, document.getElementById("copyF")));
+                document
+                    .getElementById("copyF24")
+                    .addEventListener("click", () => copyVector(preciseF24, document.getElementById("copyF24")));
+
+                function handlePaste(e) {
+                    const target = e.target;
+                    if (!target.matches('input[type="number"]')) return;
+                    const vType = target.dataset.vector;
+                    const data = (e.clipboardData || window.clipboardData).getData("text");
+                    if (!data) return;
+                    const nums = data.split(/[\s,;]+/).filter((s) => s.trim() !== "");
+                    if (nums.length <= 1) return;
+                    e.preventDefault();
+                    const start = parseInt(target.dataset.index);
+                    let inputs, precise;
+                    if (vType === "a") {
+                        inputs = inputsA;
+                        precise = preciseA;
+                    } else if (vType === "b") {
+                        inputs = inputsB;
+                        precise = preciseB;
+                    } else if (vType === "f") {
+                        inputs = inputsF;
+                        precise = preciseF;
+                    } else if (vType === "f24") {
+                        inputs = inputsF24;
+                        precise = preciseF24;
+                    } else return;
+                    for (let i = 0; i < nums.length && start + i < precise.length; i++) {
+                        const n = parseFloat(nums[i]);
+                        if (!isNaN(n)) precise[start + i] = n;
+                    }
+                    inputs.forEach((inp, i) => {
+                        inp.value = precise[i];
+                    });
+                    if (vType === "a") recomputeFromA();
+                    else if (vType === "b") recomputeFromB();
+                    else if (vType === "f") recomputeFromF();
+                    else if (vType === "f24") recomputeFromF24();
+                    target.focus();
+                }
+                document.getElementById("rowA").addEventListener("paste", handlePaste);
+                document.getElementById("rowB").addEventListener("paste", handlePaste);
+                document.getElementById("rowF").addEventListener("paste", handlePaste);
+                document.getElementById("rowF24").addEventListener("paste", handlePaste);
+
+                document.getElementById("resetBtn").addEventListener("click", () => {
+                    preciseA = preciseA.map(() => 0);
+                    preciseB = preciseB.map(() => 0);
+                    preciseF = preciseF.map(() => 0);
+                    preciseF24 = preciseF24.map(() => 0);
+                    inputsA.forEach((inp) => {
+                        inp.value = "0";
+                    });
+                    inputsB.forEach((inp) => {
+                        inp.value = "0";
+                    });
+                    inputsF.forEach((inp) => {
+                        inp.value = "0";
+                    });
+                    inputsF24.forEach((inp) => {
+                        inp.value = "0";
+                    });
+                    updateDisplay();
+                });
+
+                updateDisplay();
+            })();
+        </script>
+    </body>
+</html>
