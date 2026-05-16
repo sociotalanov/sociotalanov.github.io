@@ -207,7 +207,7 @@
 
             /* --- Transparent slider on top --- */
             .cell input[type="range"] {
-                -webkit-appearance: none;
+                -webkit-appearance: slider-vertical;
                 appearance: none;
                 width: 100%;
                 height: 100%;
@@ -236,7 +236,9 @@
                 height: 6px;
                 border-radius: 50%;
                 background: rgba(224, 224, 240, 0.3);
-                margin-top: -3px;
+                left: 50%;
+                margin-left: -3px;
+                margin-top: 0;
                 cursor: pointer;
                 border: none;
                 box-shadow:
@@ -352,7 +354,7 @@
                 .cell input[type="range"]::-webkit-slider-thumb {
                     width: 5px;
                     height: 5px;
-                    margin-top: -2px;
+                    margin-left: -2px;
                     background: rgba(224, 224, 240, 0.25);
                     box-shadow:
                         0 0 3px rgba(255, 255, 255, 0.1),
@@ -361,6 +363,7 @@
                 .cell input[type="range"]::-moz-range-thumb {
                     width: 5px;
                     height: 5px;
+                    margin-left: -2px;
                     background: rgba(224, 224, 240, 0.25);
                     box-shadow:
                         0 0 3px rgba(255, 255, 255, 0.1),
